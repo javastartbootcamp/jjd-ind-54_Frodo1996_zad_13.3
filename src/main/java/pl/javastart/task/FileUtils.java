@@ -8,10 +8,8 @@ import java.util.List;
 import java.util.Scanner;
 
 public class FileUtils {
-    private static final String FILE_PATH_TO_CURRENCIES = "C:\\Users\\frods\\IdeaProjects" +
-            "\\jjd-ind-54_Frodo1996_zad_13.3\\src\\main\\resources\\currencies.csv";
-    private static final String FILE_PATH_TO_PRODUCTS = "C:\\Users\\frods\\IdeaProjects\\" +
-            "jjd-ind-54_Frodo1996_zad_13.3\\src\\main\\resources\\products.csv";
+    private static final String FILE_PATH_TO_CURRENCIES = "src/main/resources/currencies.csv";
+    private static final String FILE_PATH_TO_PRODUCTS = "src/main/resources/products.csv";
 
     static List<Currency> readCurrencies() throws FileNotFoundException {
         Scanner scanner = new Scanner(new File(FILE_PATH_TO_CURRENCIES));
