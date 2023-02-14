@@ -3,77 +3,76 @@ package pl.javastart.task;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Objects;
 
 public class FileCalculation {
 
-    static BigDecimal sumProductsPriceInEuro(List<Currency> currencies, List<Product> products) {
-        BigDecimal sum = BigDecimal.valueOf(0);
-        if (products.size() > 0 && currencies.size() > 0) {
-            sum = sumProductsPrice(currencies, products, sum);
+    static BigDecimal sumProductsPrice(List<Currency> currencies, List<Product> products) {
+        BigDecimal sum = BigDecimal.ZERO;
+        for (Product product : products) {
+            Currency currency = getCurrency(currencies, product);
+            BigDecimal euroPrice = calculatePriceToEuro(product, Objects.requireNonNull(currency));
+            sum = sum.add(euroPrice);
         }
         return sum;
     }
 
-    static BigDecimal averageValueOfAllProducts(BigDecimal costOfAllProductsInEuro, List<Product> products) {
+    static BigDecimal averageValueOfAllProductsInEuro(List<Currency> currencies, List<Product> products) {
+        BigDecimal sum = BigDecimal.ZERO;
         BigDecimal numberOfProducts = new BigDecimal(products.size());
-        BigDecimal averageValue = BigDecimal.valueOf(0);
-        if (products.size() > 0) {
-            averageValue = costOfAllProductsInEuro.divide(numberOfProducts, RoundingMode.DOWN);
+        for (Product product : products) {
+            Currency currency = getCurrency(currencies, product);
+            BigDecimal euroPrice = calculatePriceToEuro(product, Objects.requireNonNull(currency));
+            sum = sum.add(euroPrice);
         }
-        return averageValue;
+        return sum.divide(numberOfProducts, RoundingMode.DOWN);
     }
 
     public static BigDecimal theMostExpensiveProductInEuro(List<Product> products, List<Currency> currencies) {
         BigDecimal highestValue = BigDecimal.valueOf(0);
-        if (products.size() > 0 && currencies.size() > 0) {
-            highestValue = findHighestValueInEuro(products, currencies, highestValue);
+        for (Product product : products) {
+            Currency currency = getCurrency(currencies, product);
+            BigDecimal euroPrice = calculatePriceToEuro(product, Objects.requireNonNull(currency));
+            if (euroPrice.compareTo(highestValue) > 0) {
+                highestValue = euroPrice;
+            }
         }
         return highestValue;
     }
 
     public static BigDecimal theCheapestProductInEuro(List<Product> products, List<Currency> currencies) {
-        BigDecimal lowestPrice = products.get(0).getPrice().divide(currencies.get(18).value(), RoundingMode.DOWN);
-        if (products.size() > 0) {
-            lowestPrice = findLowestPriceInEuro(products, currencies, lowestPrice);
-        }
-        return lowestPrice;
-    }
-
-    private static BigDecimal sumProductsPrice(List<Currency> currencies, List<Product> products, BigDecimal sum) {
+        BigDecimal cheapestProduct = firstProductValueCalculatedToEuro(currencies, products);
         for (Product product : products) {
-            for (Currency currency : currencies) {
-                BigDecimal productPrice = product.getPrice();
-                if (product.getCurrency().equals(currency.name())) {
-                    BigDecimal costInEuro = productPrice.divide(currency.value(), RoundingMode.DOWN);
-                    sum = sum.add(costInEuro);
-                }
+            Currency currency = getCurrency(currencies, product);
+            BigDecimal euroPrice = calculatePriceToEuro(product, Objects.requireNonNull(currency));
+            if (euroPrice.compareTo(cheapestProduct) < 0) {
+                cheapestProduct = euroPrice;
             }
         }
-        return sum;
+        return cheapestProduct;
     }
 
-    private static BigDecimal findLowestPriceInEuro(List<Product> products, List<Currency> currencies, BigDecimal lowestPriceInEuro) {
-        for (Product product : products) {
-            for (Currency currency : currencies) {
-                BigDecimal priceOfProductInEuro = product.getPrice().divide(currency.value(), RoundingMode.DOWN);
-                if (currency.name().equals(product.getCurrency()) &&
-                        priceOfProductInEuro.compareTo(lowestPriceInEuro) < 0) {
-                    lowestPriceInEuro = priceOfProductInEuro;
-                }
+    private static BigDecimal firstProductValueCalculatedToEuro(List<Currency> currencies, List<Product> products) {
+        String firstProduct = products.get(0).getCurrency();
+        for (Currency currency : currencies) {
+            if (currency.getName().equals(firstProduct)) {
+                return products.get(0).getPrice().divide(currency.getValue(), RoundingMode.DOWN);
             }
         }
-        return lowestPriceInEuro;
+        return null;
     }
 
-    private static BigDecimal findHighestValueInEuro(List<Product> products, List<Currency> currencies, BigDecimal highestValue) {
-        for (Product product : products) {
-            for (Currency currency : currencies) {
-                BigDecimal priceOfProductInEuro = product.getPrice().divide(currency.value(), RoundingMode.DOWN);
-                if (currency.name().equals(product.getCurrency()) && priceOfProductInEuro.compareTo(highestValue) > 0) {
-                    highestValue = priceOfProductInEuro;
-                }
+    private static Currency getCurrency(List<Currency> currencies, Product product) {
+        String currencyName = product.getCurrency();
+        for (Currency currency : currencies) {
+            if (currency.getName().equals(currencyName)) {
+                return currency;
             }
         }
-        return highestValue;
+        return null;
+    }
+
+    private static BigDecimal calculatePriceToEuro(Product product, Currency currency) {
+        return product.getPrice().divide(currency.getValue(), RoundingMode.DOWN);
     }
 }

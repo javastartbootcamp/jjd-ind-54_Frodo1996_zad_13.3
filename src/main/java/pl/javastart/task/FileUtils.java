@@ -15,8 +15,7 @@ public class FileUtils {
         Scanner scanner = new Scanner(new File(FILE_PATH_TO_CURRENCIES));
         List<Currency> currenciesList = new ArrayList<>();
         while (scanner.hasNextLine()) {
-            String line = scanner.nextLine();
-            String[] split = line.split(";");
+            String[] split = getAndSplitLine(scanner);
             Currency newCurrency = new Currency(split[0], new BigDecimal(split[1]));
             currenciesList.add(newCurrency);
         }
@@ -27,11 +26,15 @@ public class FileUtils {
         Scanner scanner = new Scanner(new File(FILE_PATH_TO_PRODUCTS));
         List<Product> productsList = new ArrayList<>();
         while (scanner.hasNextLine()) {
-            String line = scanner.nextLine();
-            String[] split = line.split(";");
+            String[] split = getAndSplitLine(scanner);
             Product newProduct = new Product(split[0], new BigDecimal(split[1]), split[2]);
             productsList.add(newProduct);
         }
         return productsList;
+    }
+
+    private static String[] getAndSplitLine(Scanner scanner) {
+        String line = scanner.nextLine();
+        return line.split(";");
     }
 }
